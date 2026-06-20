@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blend & Bloom — Pure. Fresh. Alive.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --jungle:  #1A3C2E;
+      --cream:   #F7F0E3;
+      --coral:   #FF6B4A;
+      --yellow:  #F5C842;
+      --mint:    #C8EDD6;
+      --white:   #FFFFFF;
+      --text-dark: #0F2219;
+      --text-mid:  #3A5A47;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); overflow-x: hidden; }
+
+    /* ───── NAV ───── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 60px;
+      background: transparent;
+      transition: background .3s;
+    }
+    nav.scrolled { background: var(--jungle); }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; font-weight: 900;
+      color: var(--cream); letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--coral); }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      color: var(--cream); text-decoration: none;
+      font-size: .875rem; font-weight: 500; letter-spacing: .04em;
+      opacity: .85; transition: opacity .2s;
+    }
+    .nav-links a:hover { opacity: 1; }
+    .nav-cta {
+      background: var(--coral); color: var(--white);
+      border: none; padding: 11px 26px; border-radius: 50px;
+      font-family: 'DM Sans', sans-serif; font-size: .875rem; font-weight: 600;
+      cursor: pointer; transition: transform .2s, box-shadow .2s;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,74,.45); }
+
+    /* ───── HERO ───── */
+    .hero {
+      min-height: 100vh;
+      background: var(--jungle);
+      display: flex; align-items: center;
+      padding: 120px 60px 60px;
+      position: relative; overflow: hidden;
+    }
+    /* Decorative blobs */
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(60px); opacity: .18; pointer-events: none;
+    }
+    .blob-1 { width: 500px; height: 500px; background: var(--coral);  top: -100px; right: -80px; }
+    .blob-2 { width: 360px; height: 360px; background: var(--yellow); bottom: -80px; left: 200px; }
+    .blob-3 { width: 260px; height: 260px; background: var(--mint);   top: 160px; left: -60px; }
+
+    .hero-content { flex: 1; max-width: 580px; position: relative; z-index: 2; }
+    .hero-eyebrow {
+      display: inline-block; background: rgba(197,237,214,.15);
+      color: var(--mint); font-size: .75rem; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; padding: 6px 16px; border-radius: 50px;
+      border: 1px solid rgba(200,237,214,.3); margin-bottom: 28px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 6vw, 5.2rem);
+      line-height: 1.08; color: var(--cream);
+      margin-bottom: 24px;
+    }
+    .hero-title em { color: var(--coral); font-style: italic; }
+    .hero-sub {
+      color: rgba(247,240,227,.65); font-size: 1.1rem; line-height: 1.7;
+      max-width: 440px; margin-bottom: 44px;
+    }
+    .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--coral); color: #fff;
+      padding: 15px 34px; border-radius: 50px; border: none;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,107,74,.5); }
+    .btn-outline {
+      background: transparent; color: var(--cream);
+      padding: 14px 30px; border-radius: 50px;
+      border: 1.5px solid rgba(247,240,227,.35);
+      font-size: 1rem; font-weight: 500; cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-outline:hover { border-color: var(--cream); }
+
+    /* hero visual — stacked cups */
+    .hero-visual {
+      flex: 1; display: flex; justify-content: center; align-items: center;
+      position: relative; z-index: 2; min-height: 520px;
+    }
+    .cup-stack {
+      position: relative; width: 340px; height: 480px;
+    }
+    .cup {
+      position: absolute; width: 130px;
+      animation: float 4s ease-in-out infinite;
+    }
+    .cup:nth-child(1) { left: 50%; transform: translateX(-50%); top: 0; animation-delay: 0s; }
+    .cup:nth-child(2) { left: 20%; top: 120px; animation-delay: .8s; }
+    .cup:nth-child(3) { right: 5%; top: 160px; animation-delay: 1.6s; }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-14px); }
+    }
+    .cup:nth-child(1) { animation-name: float-center; }
+    @keyframes float-center {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(-14px); }
+    }
+
+    /* SVG cup */
+    .cup svg { width: 100%; }
+
+    /* stats row */
+    .hero-stats {
+      position: absolute; bottom: 52px; left: 60px; right: 60px;
+      display: flex; gap: 48px; z-index: 2;
+    }
+    .stat-item { }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; color: var(--yellow); font-weight: 900;
+    }
+    .stat-label { font-size: .8rem; color: rgba(247,240,227,.55); letter-spacing: .06em; text-transform: uppercase; }
+
+    /* ───── SECTION LABEL ───── */
+    .section-label {
+      font-size: .72rem; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--coral);
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem); line-height: 1.15; color: var(--text-dark);
+    }
+
+    /* ───── WHY US ───── */
+    .why { padding: 110px 60px; background: var(--cream); }
+    .why-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+    .why-text { }
+    .why-text .section-title { margin-bottom: 20px; }
+    .why-text p { color: var(--text-mid); line-height: 1.75; margin-bottom: 40px; }
+    .why-pills { display: flex; flex-wrap: wrap; gap: 12px; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--jungle); color: var(--cream);
+      padding: 9px 20px; border-radius: 50px; font-size: .85rem; font-weight: 500;
+    }
+    .pill-icon { font-size: 1rem; }
+    .why-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .why-card {
+      background: var(--jungle); border-radius: 24px; padding: 32px 28px;
+      color: var(--cream); transition: transform .25s;
+    }
+    .why-card:hover { transform: translateY(-5px); }
+    .why-card:nth-child(even) { background: var(--coral); margin-top: 28px; }
+    .why-card:nth-child(even) .wc-title,
+    .why-card:nth-child(even) .wc-desc { color: #fff; }
+    .wc-icon { font-size: 2rem; margin-bottom: 16px; }
+    .wc-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 8px; }
+    .wc-desc { font-size: .875rem; opacity: .75; line-height: 1.65; }
+
+    /* ───── FLAVORS GRID ───── */
+    .flavors { padding: 110px 60px; background: var(--text-dark); }
+    .flavors-inner { max-width: 1200px; margin: 0 auto; }
+    .flavors-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px; }
+    .flavors-header .section-label { color: var(--yellow); }
+    .flavors-header .section-title { color: var(--cream); }
+    .filter-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
+    .tab {
+      padding: 8px 20px; border-radius: 50px; font-size: .85rem; font-weight: 500;
+      border: 1.5px solid rgba(247,240,227,.2); color: rgba(247,240,227,.55);
+      background: transparent; cursor: pointer; transition: all .2s;
+    }
+    .tab.active, .tab:hover { background: var(--coral); border-color: var(--coral); color: #fff; }
+
+    .flavor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .flavor-card {
+      border-radius: 28px; padding: 36px 28px;
+      display: flex; flex-direction: column; align-items: flex-start;
+      position: relative; overflow: hidden; cursor: pointer;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .flavor-card:hover { transform: translateY(-8px); box-shadow: 0 24px 48px rgba(0,0,0,.35); }
+    .fc-emoji { font-size: 3.5rem; margin-bottom: 20px; position: relative; z-index: 1; }
+    .fc-name {
+      font-family: 'Playfair Display', serif; font-size: 1.4rem;
+      font-weight: 700; margin-bottom: 6px; position: relative; z-index: 1;
+    }
+    .fc-desc { font-size: .875rem; line-height: 1.6; opacity: .8; margin-bottom: 20px; position: relative; z-index: 1; }
+    .fc-footer { display: flex; justify-content: space-between; align-items: center; width: 100%; position: relative; z-index: 1; }
+    .fc-price { font-size: 1.25rem; font-weight: 700; }
+    .fc-cals { font-size: .78rem; opacity: .65; }
+    .fc-add {
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      background: rgba(0,0,0,.2); color: #fff; font-size: 1.3rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .fc-add:hover { background: rgba(0,0,0,.4); }
+    /* Card color themes */
+    .fc-pink    { background: #E8608A; color: #fff; }
+    .fc-green   { background: var(--jungle); color: var(--cream); }
+    .fc-yellow  { background: var(--yellow); color: var(--text-dark); }
+    .fc-orange  { background: #F28B30; color: #fff; }
+    .fc-purple  { background: #7B5EA7; color: #fff; }
+    .fc-teal    { background: #1F8A7D; color: #fff; }
+    /* Card background blob */
+    .fc-bg-blob {
+      position: absolute; border-radius: 50%;
+      width: 220px; height: 220px; right: -60px; bottom: -60px;
+      background: rgba(255,255,255,.07); pointer-events: none;
+    }
+    .fc-bg-blob-2 {
+      position: absolute; border-radius: 50%;
+      width: 120px; height: 120px; left: -30px; top: -30px;
+      background: rgba(255,255,255,.06); pointer-events: none;
+    }
+
+    /* Badge */
+    .fc-badge {
+      position: absolute; top: 22px; right: 22px; z-index: 2;
+      background: rgba(255,255,255,.22); color: #fff;
+      font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 50px;
+    }
+    .fc-yellow .fc-badge { background: rgba(0,0,0,.12); color: var(--text-dark); }
+
+    /* ───── PROCESS ───── */
+    .process { padding: 110px 60px; background: var(--mint); }
+    .process-inner { max-width: 1100px; margin: 0 auto; }
+    .process-header { text-align: center; margin-bottom: 70px; }
+    .process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+    .step { text-align: center; position: relative; }
+    .step:not(:last-child)::after {
+      content: ''; position: absolute; top: 36px; left: 70%; width: 60%; height: 2px;
+      background: repeating-linear-gradient(90deg, var(--jungle) 0, var(--jungle) 6px, transparent 6px, transparent 14px);
+      opacity: .25;
+    }
+    .step-num {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--jungle); color: var(--cream);
+      font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; position: relative; z-index: 1;
+    }
+    .step-icon { font-size: 1.5rem; }
+    .step-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 10px; color: var(--text-dark); }
+    .step-desc { font-size: .875rem; color: var(--text-mid); line-height: 1.65; }
+
+    /* ───── TESTIMONIALS ───── */
+    .testimonials { padding: 110px 60px; background: var(--cream); }
+    .testimonials-inner { max-width: 1200px; margin: 0 auto; }
+    .test-header { text-align: center; margin-bottom: 60px; }
+    .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .test-card {
+      background: var(--white); border-radius: 24px; padding: 36px 32px;
+      border: 1px solid rgba(26,60,46,.08); transition: box-shadow .25s;
+    }
+    .test-card:hover { box-shadow: 0 12px 40px rgba(26,60,46,.1); }
+    .stars { color: var(--yellow); font-size: 1rem; margin-bottom: 18px; letter-spacing: 2px; }
+    .test-quote { font-size: 1rem; line-height: 1.75; color: var(--text-dark); margin-bottom: 28px; }
+    .test-author { display: flex; align-items: center; gap: 14px; }
+    .test-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .test-name { font-weight: 600; font-size: .9rem; }
+    .test-role { font-size: .78rem; color: var(--text-mid); }
+
+    /* ───── CTA BANNER ───── */
+    .cta-banner {
+      margin: 0 60px 80px; border-radius: 36px;
+      background: var(--jungle); padding: 80px 80px;
+      display: flex; align-items: center; justify-content: space-between; gap: 40px;
+      position: relative; overflow: hidden;
+    }
+    .cta-banner::before {
+      content: ''; position: absolute;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: var(--coral); opacity: .12; filter: blur(60px);
+      right: -80px; top: -80px; pointer-events: none;
+    }
+    .cta-text { position: relative; z-index: 1; }
+    .cta-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem; color: var(--cream); margin-bottom: 12px; line-height: 1.2;
+    }
+    .cta-text p { color: rgba(247,240,227,.65); font-size: 1rem; }
+    .cta-form { display: flex; gap: 12px; position: relative; z-index: 1; flex-shrink: 0; }
+    .cta-input {
+      background: rgba(255,255,255,.12); border: 1.5px solid rgba(247,240,227,.25);
+      color: var(--cream); placeholder: rgba(247,240,227,.5);
+      padding: 14px 22px; border-radius: 50px; font-size: .9rem;
+      width: 260px; outline: none; font-family: 'DM Sans', sans-serif;
+    }
+    .cta-input::placeholder { color: rgba(247,240,227,.5); }
+    .cta-input:focus { border-color: var(--coral); }
+
+    /* ───── FOOTER ───── */
+    footer {
+      background: var(--text-dark); color: rgba(247,240,227,.55);
+      padding: 60px 60px 36px;
+    }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; margin-bottom: 60px; }
+    .footer-brand .nav-logo { font-size: 1.7rem; display: block; margin-bottom: 16px; }
+    .footer-brand p { font-size: .875rem; line-height: 1.7; max-width: 280px; }
+    .footer-col h4 { color: var(--cream); font-size: .85rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 20px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .footer-col ul a { color: rgba(247,240,227,.55); text-decoration: none; font-size: .875rem; transition: color .2s; }
+    .footer-col ul a:hover { color: var(--cream); }
+    .footer-bottom { border-top: 1px solid rgba(247,240,227,.08); padding-top: 28px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-bottom p { font-size: .8rem; }
+    .social-row { display: flex; gap: 14px; }
+    .social-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 1.5px solid rgba(247,240,227,.15); background: transparent;
+      color: rgba(247,240,227,.55); font-size: .95rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .2s, color .2s;
+    }
+    .social-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+    /* ───── SEASONAL BANNER ───── */
+    .seasonal {
+      background: var(--yellow); text-align: center; padding: 14px 20px;
+    }
+    .seasonal p { font-size: .85rem; font-weight: 600; color: var(--text-dark); }
+    .seasonal a { color: var(--coral); text-decoration: none; }
+
+    /* ───── SCROLL ANIMATION ───── */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s, transform .6s; }
+    .reveal.in-view { opacity: 1; transform: none; }
+
+    /* ───── RESPONSIVE ───── */
+    @media (max-width: 900px) {
+      nav { padding: 18px 28px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 28px 200px; flex-direction: column; }
+      .hero-visual { min-height: 300px; }
+      .hero-stats { left: 28px; right: 28px; flex-wrap: wrap; gap: 28px; }
+      .why-inner { grid-template-columns: 1fr; gap: 48px; }
+      .flavor-grid { grid-template-columns: 1fr 1fr; }
+      .process-steps { grid-template-columns: 1fr 1fr; }
+      .test-grid { grid-template-columns: 1fr; }
+      .cta-banner { flex-direction: column; margin: 0 20px 60px; padding: 50px 36px; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+      .flavors, .why, .process, .testimonials, .flavors { padding: 70px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Seasonal Announcement -->
+<div class="seasonal">
+  <p>🌿 Summer Special: Buy 3 smoothies, get 1 FREE — <a href="#">Shop Now →</a></p>
+</div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <span class="nav-logo">Blend <span>&</span> Bloom</span>
+  <ul class="nav-links">
+    <li><a href="#flavors">Flavors</a></li>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#process">Our Process</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+  </ul>
+  <button class="nav-cta">Order Now</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="hero-content">
+    <span class="hero-eyebrow">🌱 100% Plant-Based &amp; Cold-Pressed</span>
+    <h1 class="hero-title">
+      Fuel Your Day<br>With <em>Nature's</em><br>Finest Blends
+    </h1>
+    <p class="hero-sub">
+      We source only sun-ripened, locally grown fruits and superfoods — then blend them fresh, never frozen, so every sip bursts with real flavour and real nutrients.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary">Explore Flavors</button>
+      <button class="btn-outline">Watch Our Story ▶</button>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="cup-stack">
+      <!-- Cup 1: Pink -->
+      <div class="cup" style="left:50%;top:0;transform:translateX(-50%)">
+        <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#E8608A"/>
+              <stop offset="100%" stop-color="#c94070"/>
+            </linearGradient>
+          </defs>
+          <path d="M18 30 L10 185 Q60 195 110 185 L102 30 Z" fill="url(#g1)" rx="8"/>
+          <rect x="20" y="20" width="80" height="18" rx="9" fill="#1A3C2E" opacity=".7"/>
+          <ellipse cx="60" cy="29" rx="40" ry="9" fill="#C8EDD6" opacity=".3"/>
+          <text x="60" y="95" text-anchor="middle" fill="white" font-size="28" opacity=".6">🍓</text>
+          <line x1="22" y1="60" x2="98" y2="60" stroke="white" stroke-width="1" opacity=".15"/>
+          <line x1="18" y1="110" x2="102" y2="110" stroke="white" stroke-width="1" opacity=".1"/>
+        </svg>
+      </div>
+      <!-- Cup 2: Green -->
+      <div class="cup" style="left:10%;top:130px">
+        <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1F8A7D"/>
+              <stop offset="100%" stop-color="#0d5a52"/>
+            </linearGradient>
+          </defs>
+          <path d="M18 30 L10 185 Q60 195 110 185 L102 30 Z" fill="url(#g2)"/>
+          <rect x="20" y="20" width="80" height="18" rx="9" fill="#1A3C2E" opacity=".7"/>
+          <text x="60" y="95" text-anchor="middle" fill="white" font-size="28" opacity=".6">🥝</text>
+          <line x1="22" y1="60" x2="98" y2="60" stroke="white" stroke-width="1" opacity=".15"/>
+        </svg>
+      </div>
+      <!-- Cup 3: Orange -->
+      <div class="cup" style="right:0%;top:160px">
+        <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#F28B30"/>
+              <stop offset="100%" stop-color="#c96310"/>
+            </linearGradient>
+          </defs>
+          <path d="M18 30 L10 185 Q60 195 110 185 L102 30 Z" fill="url(#g3)"/>
+          <rect x="20" y="20" width="80" height="18" rx="9" fill="#1A3C2E" opacity=".7"/>
+          <text x="60" y="95" text-anchor="middle" fill="white" font-size="28" opacity=".6">🥭</text>
+          <line x1="22" y1="60" x2="98" y2="60" stroke="white" stroke-width="1" opacity=".15"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">24+</div>
+      <div class="stat-label">Unique Flavors</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">15K</div>
+      <div class="stat-label">Happy Customers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Natural Ingredients</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Added Sugar</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="why" id="why">
+  <div class="why-inner">
+    <div class="why-text reveal">
+      <p class="section-label">Why Blend & Bloom</p>
+      <h2 class="section-title">Wellness, Without<br>Compromise</h2>
+      <p>We believe the best smoothie is the one you didn't have to make yourself — but still tastes like you did. Every cup starts with seasonal produce picked at peak ripeness, never from concentrate, never frozen.</p>
+      <div class="why-pills">
+        <span class="pill"><span class="pill-icon">🌾</span> Locally Sourced</span>
+        <span class="pill"><span class="pill-icon">❄️</span> Cold-Pressed</span>
+        <span class="pill"><span class="pill-icon">🚫</span> No Preservatives</span>
+        <span class="pill"><span class="pill-icon">🌱</span> Vegan Friendly</span>
+        <span class="pill"><span class="pill-icon">⚡</span> Superfood Boosts</span>
+      </div>
+    </div>
+    <div class="why-cards reveal">
+      <div class="why-card">
+        <div class="wc-icon">🍃</div>
+        <div class="wc-title">Farm to Cup</div>
+        <div class="wc-desc">We partner with 12 local farms within 80 km of our blending facility, ensuring peak freshness in every batch.</div>
+      </div>
+      <div class="why-card">
+        <div class="wc-icon">🔬</div>
+        <div class="wc-title">Nutritionist Crafted</div>
+        <div class="wc-desc">Each recipe is developed and reviewed by registered dietitians to maximise nutritional benefit.</div>
+      </div>
+      <div class="why-card">
+        <div class="wc-icon">♻️</div>
+        <div class="wc-title">Zero Waste Packaging</div>
+        <div class="wc-desc">Our cups and lids are made from 100% compostable plant-based materials — good for you, great for the planet.</div>
+      </div>
+      <div class="why-card">
+        <div class="wc-icon">🚚</div>
+        <div class="wc-title">Same-Day Delivery</div>
+        <div class="wc-desc">Order before noon and get your blends delivered same day, chilled and ready to enjoy.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLAVORS -->
+<section class="flavors" id="flavors">
+  <div class="flavors-inner">
+    <div class="flavors-header reveal">
+      <div>
+        <p class="section-label">Our Menu</p>
+        <h2 class="section-title" style="color:var(--cream)">Pick Your Perfect Blend</h2>
+      </div>
+      <div class="filter-tabs">
+        <button class="tab active">All</button>
+        <button class="tab">Fruity</button>
+        <button class="tab">Green</button>
+        <button class="tab">Protein</button>
+        <button class="tab">Seasonal</button>
+      </div>
+    </div>
+
+    <div class="flavor-grid">
+      <!-- Card 1 -->
+      <div class="flavor-card fc-pink reveal">
+        <div class="fc-bg-blob"></div><div class="fc-bg-blob-2"></div>
+        <span class="fc-badge">Best Seller</span>
+        <div class="fc-emoji">🍓🍌</div>
+        <div class="fc-name">Strawberry Sunrise</div>
+        <div class="fc-desc">Fresh strawberries, banana, passionfruit, and a hint of vanilla oat milk. Sweet, creamy, and impossible to resist.</div>
+        <div class="fc-footer">
+          <div><div class="fc-price">$7.50</div><div class="fc-cals">280 kcal</div></div>
+          <button class="fc-add">+</button>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="flavor-card fc-green reveal">
+        <div class="fc-bg-blob"></div><div class="fc-bg-blob-2"></div>
+        <span class="fc-badge">Detox Pick</span>
+        <div class="fc-emoji">🥬🍏</div>
+        <div class="fc-name">Emerald Reset</div>
+        <div class="fc-desc">Spinach, green apple, cucumber, ginger, lemon, and coconut water. Refreshing, zingy, and deeply cleansing.</div>
+        <div class="fc-footer">
+          <div><div class="fc-price">$8.00</div><div class="fc-cals">195 kcal</div></div>
+          <button class="fc-add">+</button>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="flavor-card fc-yellow reveal">
+        <div class="fc-bg-blob"></div><div class="fc-bg-blob-2"></div>
+        <span class="fc-badge">New</span>
+        <div class="fc-emoji">🥭🍍</div>
+        <div class="fc-name">Tropical Haze</div>
+        <div class="fc-desc">Alphonso mango, pineapple, turmeric, coconut milk, and lime zest. A golden, sun-soaked escape in a cup.</div>
+        <div class="fc-footer">
+          <div><div class="fc-price">$8.50</div><div class="fc-cals">310 kcal</div></div>
+          <button class="fc-add">+</button>
+        </div>
+      </div>
+      <!-- Card 4 -->
+      <div class="flavor-card fc-purple reveal">
+        <div class="fc-bg-blob"></div><div class="fc-bg-blob-2"></div>
+        <span class="fc-badge">High Protein</span>
+        <div class="fc-emoji">🫐🍇</div>
+        <div class="fc-name">Berry Power</div>
+        <div class="fc-desc">Wild blueberries, blackberries, acai, almond milk, hemp seeds, and plant protein. Antioxidant powerhouse.</div>
+        <div class="fc-footer">
+          <div><div class="fc-price">$9.00</div><div class="fc-cals">390 kcal</div></div>
+          <button class="fc-add">+</button>
+        </div>
+      </div>
+      <!-- Card 5 -->
+      <div class="flavor-card fc-orange reveal">
+        <div class="fc-bg-blob"></div><div class="fc-bg-blob-2"></div>
+        <span class="fc-badge">Immunity Boost</span>
+        <div class="fc-emoji">🍊🥕</div>
+        <div class="fc-name">Golden Shield</div>
+        <div class="fc-desc">Orange, carrot, ginger, turmeric, black pepper, and vitamin C. Your daily dose of natural immune support.</div>
+        <div class="fc-footer">
+          <div><div class="fc-price">$7.75</div><div class="fc-cals">220 kcal</div></div>
+          <button class="fc-add">+</button>
+        </div>
+      </div>
+      <!-- Card 6 -->
+      <div class="flavor-card fc-teal reveal">
+        <div class="fc-bg-blob"></div><div class="fc-bg-blob-2"></div>
+        <span class="fc-badge">Vegan</span>
+        <div class="fc-emoji">🍵🥥</div>
+        <div class="fc-name">Matcha Dream</div>
+        <div class="fc-desc">Ceremonial matcha, frozen banana, coconut milk, spirulina, and a drizzle of agave. Earthy, creamy, and energising.</div>
+        <div class="fc-footer">
+          <div><div class="fc-price">$8.25</div><div class="fc-cals">260 kcal</div></div>
+          <button class="fc-add">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process" id="process">
+  <div class="process-inner">
+    <div class="process-header reveal">
+      <p class="section-label">How We Do It</p>
+      <h2 class="section-title">From Farm to Your Hands<br>in Under 24 Hours</h2>
+    </div>
+    <div class="process-steps">
+      <div class="step reveal">
+        <div class="step-num"><span class="step-icon">🌱</span></div>
+        <h3 class="step-title">Harvest Fresh</h3>
+        <p class="step-desc">Our partner farms pick produce at peak ripeness every morning, with no cold-storage in between.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num"><span class="step-icon">🧪</span></div>
+        <h3 class="step-title">Quality Check</h3>
+        <p class="step-desc">Every batch is lab-tested for pesticide residue and nutritional integrity before it enters our kitchen.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num"><span class="step-icon">🌀</span></div>
+        <h3 class="step-title">Cold-Press Blend</h3>
+        <p class="step-desc">We use cold-press technology to preserve enzymes, vitamins, and flavour — heat destroys nutrients, we don't.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num"><span class="step-icon">🚀</span></div>
+        <h3 class="step-title">Deliver & Enjoy</h3>
+        <p class="step-desc">Packed in chilled, compostable cups and delivered to your door within hours of blending.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="reviews">
+  <div class="testimonials-inner">
+    <div class="test-header reveal">
+      <p class="section-label">Happy Customers</p>
+      <h2 class="section-title">People Are Talking<br>About Their Blends</h2>
+    </div>
+    <div class="test-grid">
+      <div class="test-card reveal">
+        <div class="stars">★★★★★</div>
+        <p class="test-quote">"I switched my morning coffee to the Matcha Dream and honestly haven't looked back. Sustained energy without the crash — my productivity is through the roof."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:#C8EDD6">🧑</div>
+          <div><div class="test-name">Rayan Khalid</div><div class="test-role">Product Designer, Karachi</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="stars">★★★★★</div>
+        <p class="test-quote">"The Tropical Haze is my summer obsession. It tastes like a holiday. I order three at a time and they're gone by Tuesday."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:#FFE4DC">👩</div>
+          <div><div class="test-name">Fatima Noor</div><div class="test-role">Yoga Instructor, Lahore</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="stars">★★★★★</div>
+        <p class="test-quote">"As a nutritionist I'm picky about what I recommend. Blend & Bloom's ingredient transparency and no-sugar policy make them the only smoothie brand I trust."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:#EDE4FF">🧑‍⚕️</div>
+          <div><div class="test-name">Dr. Amir Shah</div><div class="test-role">Registered Dietitian, Islamabad</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<div class="cta-banner reveal">
+  <div class="cta-text">
+    <h2>Get 20% off your<br>first order.</h2>
+    <p>Subscribe to our newsletter for exclusive deals, new flavour drops, and wellness tips.</p>
+  </div>
+  <div class="cta-form">
+    <input class="cta-input" type="email" placeholder="your@email.com"/>
+    <button class="btn-primary" style="white-space:nowrap;flex-shrink:0">Claim Offer</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="nav-logo">Blend <span>&</span> Bloom</span>
+        <p>Pure ingredients. Real flavour. Delivered fresh to your door — because your body deserves the best nature has to offer.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Menu</h4>
+        <ul>
+          <li><a href="#">All Flavors</a></li>
+          <li><a href="#">Seasonal Specials</a></li>
+          <li><a href="#">Protein Blends</a></li>
+          <li><a href="#">Detox Range</a></li>
+          <li><a href="#">Kids' Menu</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">Our Story</a></li>
+          <li><a href="#">Farm Partners</a></li>
+          <li><a href="#">Sustainability</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Track Order</a></li>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#">Allergen Info</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Blend & Bloom Ltd. All rights reserved. Made with 🌿 and cold-press tech.</p>
+      <div class="social-row">
+        <button class="social-btn">𝕏</button>
+        <button class="social-btn">f</button>
+        <button class="social-btn">📸</button>
+        <button class="social-btn">▶</button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Sticky nav background
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => io.observe(r));
+
+  // Filter tabs
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // Add to order button
+  document.querySelectorAll('.fc-add').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.textContent = '✓';
+      btn.style.background = 'rgba(0,200,100,.4)';
+      setTimeout(() => { btn.textContent = '+'; btn.style.background = ''; }, 1200);
+    });
+  });
+</script>
+</body>
+</html>
