@@ -1,1 +1,1 @@
-# car-wash
+Smoothie frontend
